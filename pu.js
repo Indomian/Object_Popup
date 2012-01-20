@@ -32,10 +32,10 @@ __PU={
 		}
 	},
 	addClass:function(className){
-		$(this.pu).addClass(className);
+		this.pu.addClass(className);
 	},
 	removeClass:function(className){
-		$(this.pu).removeClass(className);
+		this.pu.removeClass(className);
 	},
 	resize:function(w,h){
 		if(!this.isset() || !w || !h) return false;
@@ -63,7 +63,7 @@ __PU={
 		if(!this.pu) return false;
 		var self=this;
 		this.pu.stop().fadeOut(100,function(){
-			self.sh.fadeOut(100);
+			self.sh.fadeOut(100,self.evAfterHide);
 		});
 	},
 	center:function(t){
@@ -112,7 +112,40 @@ __PU={
 			elm.attr(attrs);
 		return elm;
 	},
+	confirm:function(m){
+		this.create(315);
+		if(!('out' in this.cm)){
+			this.cm.out=this.createElm('div',{'class':'cm_out'})
+			this.cm.content=this.createElm('div',{'class':'cm_content'})
+			this.cm.but=this.createElm('div',{'class':'cm_buttons'});
+			this.cm.ok=this.createElm('a',{'href':'#','class':'submit'}).html('Принять');
+			this.cm.cancel=this.cm.ok.clone(true).html('Отмена');
+			this.cm.but.append(this.cm.ok).append(this.cm.cancel);
+			this.cm.out.append(this.cm.content).append(this.cm.but);
+		}
+		this.cm.content.html(m);
+		var self=this;
+		if('positive' in this.cm){
+			this.cm.ok.click(function(){
+				self.cm.positive();
+				self.hide();
+			});
+		}
+		if('negative' in this.cm){
+			this.cm.cancel.click(function(){
+				self.cm.negative();
+				self.hide();
+			});
+		}
+		this.set(this.cm.out);
+		this.show();
+	},
+	confirmResult:function(p,n){
+		if(p && typeof p=='function') this.cm.positive=p;
+		if(n && typeof n=='function') this.cm.negative=n;
+	},
 	evAfterShow:function(){},
+	evAfterHide:function(){},
 	evDoShow:function(){},
 	evDoHide:function(){}
 }
