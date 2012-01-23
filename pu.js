@@ -4,6 +4,7 @@ __PU={
 	cnt:null,
 	sh:null,
 	bd:null,
+	cm:{},
 	create:function(w,h){
 		if(!this.isset()){
 			var body=$("body");
@@ -11,7 +12,7 @@ __PU={
 			var pu_out=this.createElm("div",{'class':"pu_out"});
 			var pu_in=this.createElm("div",{'class':"pu_in"});
 			var pu_cnt=this.createElm("div",{'class':"pu_cnt"});
-			var pu_cls=this.createElm("a",{'class':"pu_cls",'href':'javascript:void'}).html('x');
+			var pu_cls=this.createElm("a",{'class':"pu_cls",'href':'#'}).html('x');
 			var pu_sh=this.createElm('div',{'class':'pu_sh'});
 			this.cnt=pu_cnt;
 			this.cls=pu_cls;
@@ -63,7 +64,7 @@ __PU={
 		if(!this.pu) return false;
 		var self=this;
 		this.pu.stop().fadeOut(100,function(){
-			self.sh.fadeOut(100,self.evAfterHide);
+			self.sh.fadeOut(100,function(){self.evAfterHide()});
 		});
 	},
 	center:function(t){
@@ -112,9 +113,41 @@ __PU={
 			elm.attr(attrs);
 		return elm;
 	},
+	alert:function(m){
+		this._createConfirm();
+		this.cm.cancel.hide();
+		this.cm.ok.addClass('cm_alert_ok');
+		this.confirm(m);
+		this.evAfterHide=function(){
+			this.cm.cancel.show();
+			this.cm.ok.removeClass('cm_alert_ok');
+		}
+	},
 	confirm:function(m){
 		this.create(315);
+		this._createConfirm();
+		this.cm.content.html(m);
+		var self=this;
+		this.cm.ok.unbind('click').click(function(){
+			if('positive' in self.cm)
+				self.cm.positive();
+			self.hide();
+		})
+		this.cm.cancel.unbind('click').click(function(){
+			if('negative' in self.cm)
+				self.cm.negative();
+			self.hide();
+		})
+		this.set(this.cm.out.clone(true));
+		this.show();
+	},
+	confirmResult:function(p,n){
+		if(p && typeof p=='function') this.cm.positive=p;
+		if(n && typeof n=='function') this.cm.negative=n;
+	},
+	_createConfirm:function(){
 		if(!('out' in this.cm)){
+			var self=this;
 			this.cm.out=this.createElm('div',{'class':'cm_out'})
 			this.cm.content=this.createElm('div',{'class':'cm_content'})
 			this.cm.but=this.createElm('div',{'class':'cm_buttons'});
@@ -123,26 +156,6 @@ __PU={
 			this.cm.but.append(this.cm.ok).append(this.cm.cancel);
 			this.cm.out.append(this.cm.content).append(this.cm.but);
 		}
-		this.cm.content.html(m);
-		var self=this;
-		if('positive' in this.cm){
-			this.cm.ok.click(function(){
-				self.cm.positive();
-				self.hide();
-			});
-		}
-		if('negative' in this.cm){
-			this.cm.cancel.click(function(){
-				self.cm.negative();
-				self.hide();
-			});
-		}
-		this.set(this.cm.out);
-		this.show();
-	},
-	confirmResult:function(p,n){
-		if(p && typeof p=='function') this.cm.positive=p;
-		if(n && typeof n=='function') this.cm.negative=n;
 	},
 	evAfterShow:function(){},
 	evAfterHide:function(){},
