@@ -25,7 +25,7 @@ __PU={
 			body.append(pu_out).append(pu_sh);
 			if(w)pu_out.width(w);
 			if(h)pu_out.height(h);
-			this.sh.height(body.height());
+			this.sh.height($(document).height());
 			this.cls.click(function(){self.hide()});
 			this.sh.click(function(){self.hide()});
 		}else{
@@ -58,6 +58,7 @@ __PU={
 			var callFunc = self.evAfterShow;
 			self.pu.stop().fadeIn(100, callFunc);
 		})
+		this._resizeShadow();
 	},
 	hide:function(){
 		this.evDoHide();
@@ -77,7 +78,10 @@ __PU={
 				self.center(true);
 			})
 		}
-		this.pu.css({top:wnd.height()/2+wnd.scrollTop()+"px",marginTop:"-"+(this.h/2) + "px"})
+		var top=wnd.height()/2+wnd.scrollTop();
+		if(top-(this.h/2)<0)
+			top=this.h/2;
+		this.pu.css({'top':top+"px",marginTop:"-"+(this.h/2) + "px"})
 	},
 	set:function(c){
 		this.cnt.empty();
@@ -92,8 +96,8 @@ __PU={
 	size:function(){
 		var sz={'w':0,'h':0};
 		if(this.pu){
-			this.h=this.pu.height();
-			this.w=this.pu.width();
+			this.h=this.pu.height()+parseInt(this.pu.css('padding-top'))+parseInt(this.pu.css('padding-bottom'));
+			this.w=this.pu.width()+parseInt(this.pu.css('padding-left'))+parseInt(this.pu.css('padding-right'));
 			sz.w=this.w;
 			sz.h=this.h;
 		}
@@ -157,8 +161,16 @@ __PU={
 			this.cm.out.append(this.cm.content).append(this.cm.but);
 		}
 	},
+	_resizeShadow:function(e){
+		__PU.sh.height($(document).height());
+		__PU.center();
+	},
 	evAfterShow:function(){},
-	evAfterHide:function(){},
-	evDoShow:function(){},
+	evAfterHide:function(){
+		$(window).unbind('resize',__PU._resizeShadow);
+	},
+	evDoShow:function(){
+		$(window).resize(__PU._resizeShadow);
+	},
 	evDoHide:function(){}
 }
